@@ -33,7 +33,7 @@
     See https://docs.microsoft.com/en-us/dotnet/standard/analyzers/platform-compat-analyzer and 
     https://github.com/dotnet/designs/blob/main/accepted/2020/platform-checks/platform-checks.md for details
     -->
-    <DefineConstants>$(DefineConstants);NET_CORE</DefineConstants>
+    <DefineConstants>$(DefineConstants);NET_CORE;WINDOWS_APP</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Label="NuGet and AssemblyInfo metadata">
@@ -299,10 +299,6 @@
   <ItemGroup Label="Build Tools" Condition="$([MSBuild]::IsOsPlatform('Windows'))">
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.0" PrivateAssets="All" />
     <PackageReference Include="Microsoft.CodeAnalysis.RulesetToEditorconfigConverter" Version="3.0.0" PrivateAssets="All" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.DotNet.ILCompiler" Version="7.0.0-*" />
   </ItemGroup>
 
   <ItemGroup>
