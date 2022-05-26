@@ -1,0 +1,3 @@
+[submodule "src/external/BenchmarkDotNet"]
+	path = src/external/BenchmarkDotNet
+	url = https://github.com/dotnet/BenchmarkDotNet.git

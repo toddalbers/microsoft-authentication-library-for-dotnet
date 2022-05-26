@@ -4,8 +4,12 @@
 using System;
 using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Diagnosers;
+using BenchmarkDotNet.Environments;
 using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Running;
+using BenchmarkDotNet.Toolchains.CsProj;
+using BenchmarkDotNet.Toolchains.DotNetCli;
+using BenchmarkDotNet.Toolchains.NativeAot;
 
 namespace Microsoft.Identity.Test.Performance
 {
@@ -22,13 +26,15 @@ namespace Microsoft.Identity.Test.Performance
                     typeof(AcquireTokenForOboCacheTests),
                     typeof(TokenCacheTests),
             }).RunAll(DefaultConfig.Instance
+                .AddJob(Job.Default.WithRuntime(CoreRuntime.Core60))                
+                .AddJob(Job.Default.WithRuntime(NativeAotRuntime.Net70))                
                 .WithOptions(ConfigOptions.DisableLogFile)
                 //.WithOptions(ConfigOptions.DontOverwriteResults) // Uncomment when running manually
-                .AddDiagnoser(MemoryDiagnoser.Default) // https://benchmarkdotnet.org/articles/configs/diagnosers.html
+                .AddDiagnoser(MemoryDiagnoser.Default)); // https://benchmarkdotnet.org/articles/configs/diagnosers.html
                                                        //.AddDiagnoser(new EtwProfiler()) // https://adamsitnik.com/ETW-Profiler/
-                .AddJob(
-                    Job.Default
-                        .WithId("Job-PerfTests")));
+                //.AddJob(
+                //    Job.Default
+                //        .WithId("Job-PerfTests")));
             }
             catch (Exception ex)
             {
