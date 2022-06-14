@@ -2,7 +2,7 @@
   <PropertyGroup>
 
     <TargetFrameworkNetDesktop>net461</TargetFrameworkNetDesktop>
-    <TargetFrameworkNetCore>netcoreapp3.1</TargetFrameworkNetCore>
+    <TargetFrameworkNetCore>net6</TargetFrameworkNetCore>
     <TargetFrameworks>$(TargetFrameworkNetDesktop);$(TargetFrameworkNetCore)</TargetFrameworks>
 
     <PathToMsalSources>$(MSBuildThisFileDirectory)../Microsoft.Identity.Client/</PathToMsalSources>

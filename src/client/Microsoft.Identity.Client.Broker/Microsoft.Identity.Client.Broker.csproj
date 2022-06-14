@@ -2,7 +2,7 @@
   <PropertyGroup>
 
     <TargetFrameworkNetDesktop>net462</TargetFrameworkNetDesktop>
-    <TargetFrameworkNetCore>netcoreapp3.1</TargetFrameworkNetCore>
+    <TargetFrameworkNetCore>net6</TargetFrameworkNetCore>
 
     <PlatformTarget>AnyCPU</PlatformTarget>
     <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(TargetFrameworkNetDesktop);$(TargetFrameworkNetCore)</TargetFrameworks>

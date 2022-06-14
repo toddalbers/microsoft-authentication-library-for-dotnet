@@ -5,8 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
+using System.IO;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -15,14 +14,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Extensibility;
-using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.Integration.net45.Infrastructure;
 using Microsoft.Identity.Test.Integration.NetFx.Infrastructure;
-using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.Unit;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
@@ -177,6 +174,66 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                .ConfigureAwait(false);
 
             Assert.AreEqual(TokenSource.Cache, authResult.AuthenticationResultMetadata.TokenSource);            
+        }
+
+        [TestMethod]
+        [DataRow(Cloud.Public, RunOn.NetCore)]
+        public async Task WithAppTokenProvider_TestAsync(Cloud cloud, RunOn runOn)
+        {
+            IConfidentialAppSettings settings = ConfidentialAppSettings.GetSettings(cloud);
+
+            AuthenticationResult authResult;
+
+            IConfidentialClientApplication confidentialApp1 = ConfidentialClientApplicationBuilder
+                .Create(settings.ClientId)
+                .WithAuthority(settings.Authority, true)                
+                .WithClientSecret(settings.GetSecret())
+                .WithTestLogging()
+                .Build();
+
+            BindCache(confidentialApp1.AppTokenCache);
+
+            authResult = await confidentialApp1
+                .AcquireTokenForClient(settings.AppScopes)                
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+
+            Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
+
+            // Call again to ensure token cache is hit
+            authResult = await confidentialApp1
+               .AcquireTokenForClient(settings.AppScopes)
+                .OnBeforeTokenRequest((data) =>
+                {
+                    throw new InvalidOperationException("Should not be invoking this callback when the token is fetched from the cache");
+                })
+               .ExecuteAsync()
+               .ConfigureAwait(false);
+
+            Assert.AreEqual(TokenSource.Cache, authResult.AuthenticationResultMetadata.TokenSource);
+        }
+
+        public static readonly string CacheFile = @"C:\temp\test.msalcache.user.json";
+        
+        private static void BindCache(ITokenCache tokenCache)
+        {
+            
+            tokenCache.SetBeforeAccess(notificationArgs =>
+            {
+                notificationArgs.TokenCache.DeserializeMsalV3(File.Exists(CacheFile)
+                    ? File.ReadAllBytes(CacheFile)
+                    : null);
+            });
+
+            tokenCache.SetAfterAccess(notificationArgs =>
+            {
+                // if the access operation resulted in a cache update
+                if (notificationArgs.HasStateChanged)
+                {
+                    // reflect changes in the persistent store
+                    File.WriteAllBytes(CacheFile, notificationArgs.TokenCache.SerializeMsalV3());
+                }
+            });
         }
 
         private static void ModifyRequest(OnBeforeTokenRequestData data, X509Certificate2 certificate)
