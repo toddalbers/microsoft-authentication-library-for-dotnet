@@ -850,7 +850,7 @@ namespace Microsoft.Identity.Client
         /// application registration portal (https://aka.ms/msal-net-register-app)/. REQUIRED</param>
         [EditorBrowsable(EditorBrowsableState.Never)]        
         [Obsolete("Use PublicClientApplicationBuilder instead. " + MsalErrorMessage.AkaMsmsalnet3BreakingChanges, true)]
-        public PublicClientApplication(string clientId) : this(clientId, DefaultAuthority)
+        public PublicClientApplication(string clientId) : this(clientId, DefaultAuthority.ToString())
         {
             throw MigrationHelper.CreateMsalNet3BreakingChangesException();
         }

@@ -19,7 +19,7 @@ namespace Microsoft.Identity.Client
     {
         public AuthorityInfo(
             AuthorityType authorityType,
-            string authority,
+            Uri authority,
             bool validateAuthority)
         {
             AuthorityType = authorityType;
@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Client
             switch (AuthorityType)
             {
                 case AuthorityType.B2C:
-                    var authorityUri = new Uri(authority);
+                    var authorityUri = authority;
                     string[] pathSegments = GetPathSegments(authorityUri.AbsolutePath);
 
                     if (pathSegments.Length < 3)
@@ -42,16 +42,16 @@ namespace Microsoft.Identity.Client
                         throw new ArgumentException(MsalErrorMessage.B2cAuthorityUriInvalidPath);
                     }
 
-                    CanonicalAuthority = string.Format(
+                    CanonicalAuthority = new Uri(string.Format(
                         CultureInfo.InvariantCulture,
                         "https://{0}/{1}/{2}/{3}/",
                         authorityUri.Authority,
                         pathSegments[0],
                         pathSegments[1],
-                        pathSegments[2]);
+                        pathSegments[2]));
                     break;
                 case AuthorityType.Dsts:
-                    authorityUri = new Uri(authority);
+                    authorityUri = authority;
                     pathSegments = GetPathSegments(authorityUri.AbsolutePath);
 
                     if (pathSegments.Length < 2)
@@ -59,12 +59,12 @@ namespace Microsoft.Identity.Client
                         throw new ArgumentException(MsalErrorMessage.DstsAuthorityUriInvalidPath);
                     }
 
-                    CanonicalAuthority = string.Format(
+                    CanonicalAuthority = new Uri(string.Format(
                         CultureInfo.InvariantCulture,
                         "https://{0}/{1}/{2}/",
                         authorityUri.Authority,
                         pathSegments[0],
-                        pathSegments[1]);
+                        pathSegments[1]));
 
                     UserRealmUriPrefix = UriBuilderExtensions.GetHttpsUriWithOptionalPort(
                         string.Format(
@@ -77,14 +77,14 @@ namespace Microsoft.Identity.Client
                     
                     break;
                 default:
-                    CanonicalAuthority = 
+                    CanonicalAuthority = new Uri(
                         UriBuilderExtensions.GetHttpsUriWithOptionalPort(
                             string.Format(                    
                                 CultureInfo.InvariantCulture,                    
                                 "https://{0}/{1}/",
                                 authorityBuilder.Uri.Authority,
                                 GetFirstPathSegment(authority)),
-                            authorityBuilder.Port);
+                            authorityBuilder.Port));
 
                     UserRealmUriPrefix = UriBuilderExtensions.GetHttpsUriWithOptionalPort(
                         string.Format(
@@ -97,21 +97,19 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        private string[] GetPathSegments(string absolutePath)
+        public AuthorityInfo(AuthorityInfo other) :
+            this(
+                other.Host,
+                other.CanonicalAuthority,
+                other.AuthorityType,
+                other.UserRealmUriPrefix,
+                other.ValidateAuthority)
         {
-            string[] pathSegments = absolutePath.Substring(1).Split(
-                        new[]
-                        {
-                        '/'
-                        },
-                        StringSplitOptions.RemoveEmptyEntries);
-
-            return pathSegments;
         }
 
         private AuthorityInfo(
             string host,
-            string canonicalAuthority,
+            Uri canonicalAuthority,
             AuthorityType authorityType,
             string userRealmUriPrefix,
             bool validateAuthority)
@@ -123,25 +121,16 @@ namespace Microsoft.Identity.Client
             ValidateAuthority = validateAuthority;
         }
 
-        public AuthorityInfo(AuthorityInfo other) :
-            this(
-                other.Host,
-                other.CanonicalAuthority,
-                other.AuthorityType,
-                other.UserRealmUriPrefix,
-                other.ValidateAuthority)
-        {
-        }
-
         public string Host { get; }
-        public string CanonicalAuthority { get; }
+        public Uri CanonicalAuthority { get; }
+
+        public string UserRealmUriPrefix { get; }
+        public bool ValidateAuthority { get; }
 
         // Please avoid the direct use of this property.
         // Ideally, this property should be removed. But due to
         // dependencies and time constraints, refactoring is done in steps.
         internal AuthorityType AuthorityType { get; }
-        public string UserRealmUriPrefix { get; }
-        public bool ValidateAuthority { get; }
 
         internal bool IsInstanceDiscoverySupported => (AuthorityType == AuthorityType.Aad);
 
@@ -151,9 +140,9 @@ namespace Microsoft.Identity.Client
         internal bool IsClientInfoSupported => (AuthorityType == AuthorityType.Aad || AuthorityType == AuthorityType.Dsts || AuthorityType == AuthorityType.B2C);
 
         #region Builders
-        internal static AuthorityInfo FromAuthorityUri(string authorityUri, bool validateAuthority)
+        internal static AuthorityInfo FromAuthorityUri(Uri authorityUri, bool validateAuthority)
         {
-            string canonicalUri = CanonicalizeAuthorityUri(authorityUri);
+            Uri canonicalUri = CanonicalizeAuthorityUri(authorityUri);
             ValidateAuthorityUri(canonicalUri);
 
             var authorityType = GetAuthorityType(canonicalUri);
@@ -170,7 +159,7 @@ namespace Microsoft.Identity.Client
         internal static AuthorityInfo FromAadAuthority(Uri cloudInstanceUri, Guid tenantId, bool validateAuthority)
         {
 #pragma warning disable CA1305 // Specify IFormatProvider
-            return FromAuthorityUri(new Uri(cloudInstanceUri, tenantId.ToString("D")).AbsoluteUri, validateAuthority);
+            return FromAuthorityUri(new Uri(cloudInstanceUri, tenantId.ToString("D")), validateAuthority);
 #pragma warning restore CA1305 // Specify IFormatProvider
         }
 
@@ -180,7 +169,7 @@ namespace Microsoft.Identity.Client
             {
                 return FromAadAuthority(cloudInstanceUri, tenantId, validateAuthority);
             }
-            return FromAuthorityUri(new Uri(cloudInstanceUri, tenant).AbsoluteUri, validateAuthority);
+            return FromAuthorityUri(new Uri(cloudInstanceUri, tenant), validateAuthority);
         }
 
         internal static AuthorityInfo FromAadAuthority(
@@ -189,7 +178,7 @@ namespace Microsoft.Identity.Client
             bool validateAuthority)
         {
 #pragma warning disable CA1305 // Specify IFormatProvider
-            string authorityUri = GetAuthorityUri(azureCloudInstance, AadAuthorityAudience.AzureAdMyOrg, tenantId.ToString("D"));
+            Uri authorityUri = GetAuthorityUri(azureCloudInstance, AadAuthorityAudience.AzureAdMyOrg, tenantId.ToString("D"));
 #pragma warning restore CA1305 // Specify IFormatProvider
             return new AuthorityInfo(AuthorityType.Aad, authorityUri, validateAuthority);
         }
@@ -204,7 +193,7 @@ namespace Microsoft.Identity.Client
                 return FromAadAuthority(azureCloudInstance, tenantIdGuid, validateAuthority);
             }
 
-            string authorityUri = GetAuthorityUri(azureCloudInstance, AadAuthorityAudience.AzureAdMyOrg, tenant);
+            Uri authorityUri = GetAuthorityUri(azureCloudInstance, AadAuthorityAudience.AzureAdMyOrg, tenant);
             return new AuthorityInfo(AuthorityType.Aad, authorityUri, validateAuthority);
         }
 
@@ -213,27 +202,27 @@ namespace Microsoft.Identity.Client
             AadAuthorityAudience authorityAudience,
             bool validateAuthority)
         {
-            string authorityUri = GetAuthorityUri(azureCloudInstance, authorityAudience);
+            Uri authorityUri = GetAuthorityUri(azureCloudInstance, authorityAudience);
             return new AuthorityInfo(AuthorityType.Aad, authorityUri, validateAuthority);
         }
 
         internal static AuthorityInfo FromAadAuthority(AadAuthorityAudience authorityAudience, bool validateAuthority)
         {
-            string authorityUri = GetAuthorityUri(AzureCloudInstance.AzurePublic, authorityAudience);
+            Uri authorityUri = GetAuthorityUri(AzureCloudInstance.AzurePublic, authorityAudience);
             return new AuthorityInfo(AuthorityType.Aad, authorityUri, validateAuthority);
         }
 
-        internal static AuthorityInfo FromAadAuthority(string authorityUri, bool validateAuthority)
+        internal static AuthorityInfo FromAadAuthority(Uri authorityUri, bool validateAuthority)
         {
             return new AuthorityInfo(AuthorityType.Aad, authorityUri, validateAuthority);
         }
 
-        internal static AuthorityInfo FromAdfsAuthority(string authorityUri, bool validateAuthority)
+        internal static AuthorityInfo FromAdfsAuthority(Uri authorityUri, bool validateAuthority)
         {
             return new AuthorityInfo(AuthorityType.Adfs, authorityUri, validateAuthority);
         }
 
-        internal static AuthorityInfo FromB2CAuthority(string authorityUri)
+        internal static AuthorityInfo FromB2CAuthority(Uri authorityUri)
         {
             return new AuthorityInfo(AuthorityType.B2C, authorityUri, false);
         }
@@ -280,24 +269,16 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        internal static string CanonicalizeAuthorityUri(string uri)
+        internal static Uri CanonicalizeAuthorityUri(Uri uri)
         {
-            if (!string.IsNullOrWhiteSpace(uri) && !uri.EndsWith("/", StringComparison.OrdinalIgnoreCase))
-            {
-                uri = uri + "/";
-            }
-
-            return uri.ToLowerInvariant();
+            return new Uri(uri.ToString().ToLowerInvariant());
         }
 
         internal bool IsDefaultAuthority
         {
             get
             {
-                return string.Equals(
-                    CanonicalAuthority,
-                    ClientApplicationBase.DefaultAuthority,
-                    StringComparison.OrdinalIgnoreCase);
+                return CanonicalAuthority.Equals(ClientApplicationBase.DefaultAuthority);
             }
         }
 
@@ -326,19 +307,14 @@ namespace Microsoft.Identity.Client
 
         #endregion
 
-        private static void ValidateAuthorityUri(string authority)
+        private static void ValidateAuthorityUri(Uri authority)
         {
-            if (string.IsNullOrWhiteSpace(authority))
+            if (authority == null)
             {
                 throw new ArgumentNullException(nameof(authority));
             }
-
-            if (!Uri.IsWellFormedUriString(authority, UriKind.Absolute))
-            {
-                throw new ArgumentException(MsalErrorMessage.AuthorityInvalidUriFormat, nameof(authority));
-            }
-
-            var authorityUri = new Uri(authority);
+            
+            var authorityUri = authority;
             if (authorityUri.Scheme != "https")
             {
                 throw new ArgumentException(MsalErrorMessage.AuthorityUriInsecure, nameof(authority));
@@ -357,7 +333,7 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        private static string GetAuthorityUri(
+        private static Uri GetAuthorityUri(
             AzureCloudInstance azureCloudInstance,
             AadAuthorityAudience authorityAudience,
             string tenantId = null)
@@ -365,16 +341,21 @@ namespace Microsoft.Identity.Client
             string cloudUrl = GetCloudUrl(azureCloudInstance);
             string tenantValue = GetAadAuthorityAudienceValue(authorityAudience, tenantId);
 
-            return string.Format(CultureInfo.InvariantCulture, "{0}/{1}", cloudUrl, tenantValue);
+            return new Uri(string.Format(CultureInfo.InvariantCulture, "{0}/{1}", cloudUrl, tenantValue));
         }
 
         internal static string GetFirstPathSegment(string authority)
         {
             var uri = new Uri(authority);
-            if (uri.Segments.Length >= 2)
+            return GetFirstPathSegment(uri);
+        }
+
+        internal static string GetFirstPathSegment(Uri authority)
+        {
+            if (authority.Segments.Length >= 2)
             {
-                return new Uri(authority).Segments[1]
-                                         .TrimEnd('/');
+                return authority.Segments[1]
+                    .TrimEnd('/');
             }
 
             throw new InvalidOperationException(MsalErrorMessage.AuthorityDoesNotHaveTwoSegments);
@@ -383,16 +364,33 @@ namespace Microsoft.Identity.Client
         internal static string GetSecondPathSegment(string authority)
         {
             var uri = new Uri(authority);
-            if (uri.Segments.Length >= 3)
+            return GetSecondPathSegment(uri);
+        }
+
+        internal static string GetSecondPathSegment(Uri authority)
+        {
+            if (authority.Segments.Length >= 3)
             {
-                return new Uri(authority).Segments[2]
-                                         .TrimEnd('/');
+                return authority.Segments[2]
+                    .TrimEnd('/');
             }
 
             throw new InvalidOperationException(MsalErrorMessage.DstsAuthorityDoesNotHaveThreeSegments);
         }
 
-        private static AuthorityType GetAuthorityType(string authority) 
+        private static string[] GetPathSegments(string absolutePath)
+        {
+            string[] pathSegments = absolutePath.Substring(1).Split(
+                new[]
+                {
+                    '/'
+                },
+                StringSplitOptions.RemoveEmptyEntries);
+
+            return pathSegments;
+        }
+
+        private static AuthorityType GetAuthorityType(Uri authority) 
         {
             string firstPathSegment = GetFirstPathSegment(authority);
 
@@ -528,7 +526,7 @@ namespace Microsoft.Identity.Client
                     return initialAuthority;
                 }
 
-                string tenantedAuthority = initialAuthority.GetTenantedAuthority(tenantId);
+                Uri tenantedAuthority = initialAuthority.GetTenantedAuthority(tenantId);
 
                 return Authority.CreateAuthority(tenantedAuthority, authorityInfo.ValidateAuthority);
             }
@@ -540,7 +538,7 @@ namespace Microsoft.Identity.Client
                     Host = environment
                 };
 
-                return Authority.CreateAuthority(uriBuilder.Uri.AbsoluteUri, authorityInfo.ValidateAuthority);
+                return Authority.CreateAuthority(uriBuilder.Uri, authorityInfo.ValidateAuthority);
             }
 
             private static void ValidateTypeMismatch(AuthorityInfo configAuthorityInfo, AuthorityInfo requestAuthorityInfo)

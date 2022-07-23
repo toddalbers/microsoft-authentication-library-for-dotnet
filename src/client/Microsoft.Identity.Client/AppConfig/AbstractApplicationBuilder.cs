@@ -582,7 +582,7 @@ namespace Microsoft.Identity.Client
 
                 var authorityInfo = new AuthorityInfo(
                         AuthorityType.Aad,
-                        new Uri($"{authorityInstance}/{authorityAudience}").ToString(),
+                        new Uri($"{authorityInstance}/{authorityAudience}"),
                         Config.ValidateAuthority);
 
                 Config.Authority = new AadAuthority(authorityInfo);
@@ -651,7 +651,8 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(nameof(authorityUri));
             }
 
-            return WithAuthority(authorityUri.ToString(), validateAuthority);
+            Config.Authority = Authority.CreateAuthority(authorityUri, validateAuthority);
+            return (T)this;
         }
 
         /// <summary>
@@ -677,9 +678,12 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(authorityUri);
             }
 
-            Config.Authority = Authority.CreateAuthority(authorityUri, validateAuthority);
+            if (!Uri.IsWellFormedUriString(authorityUri, UriKind.Absolute))
+            {
+                throw new ArgumentException(MsalErrorMessage.AuthorityInvalidUriFormat, nameof(authorityUri));
+            }
 
-            return (T)this;
+            return WithAuthority(new Uri(authorityUri), validateAuthority);
         }
 
         /// <summary>
@@ -835,8 +839,17 @@ namespace Microsoft.Identity.Client
         /// <returns>The builder to chain the .With methods</returns>
         public T WithAdfsAuthority(string authorityUri, bool validateAuthority = true)
         {
+            if (string.IsNullOrWhiteSpace(authorityUri))
+            {
+                throw new ArgumentNullException(nameof(authorityUri));
+            }
 
-            var authorityInfo = AuthorityInfo.FromAdfsAuthority(authorityUri, validateAuthority);
+            if (!Uri.IsWellFormedUriString(authorityUri, UriKind.Absolute))
+            {
+                throw new ArgumentException(MsalErrorMessage.AuthorityInvalidUriFormat, nameof(authorityUri));
+            }
+
+            var authorityInfo = AuthorityInfo.FromAdfsAuthority(new Uri(authorityUri), validateAuthority);
             Config.Authority = AdfsAuthority.CreateAuthority(authorityInfo);
             return (T)this;
         }
@@ -850,7 +863,17 @@ namespace Microsoft.Identity.Client
         /// <returns>The builder to chain the .With methods</returns>
         public T WithB2CAuthority(string authorityUri)
         {
-            var authorityInfo = AuthorityInfo.FromB2CAuthority(authorityUri);
+            if (string.IsNullOrEmpty(authorityUri))
+            {
+                throw new ArgumentNullException(MsalErrorMessage.AuthorityInvalidUriFormat, nameof(authorityUri));
+            }
+
+            if (!Uri.IsWellFormedUriString(authorityUri, UriKind.Absolute))
+            {
+                throw new ArgumentException(MsalErrorMessage.AuthorityInvalidUriFormat, nameof(authorityUri));
+            }
+
+            var authorityInfo = AuthorityInfo.FromB2CAuthority(new Uri(authorityUri));
             Config.Authority = B2CAuthority.CreateAuthority(authorityInfo);
 
             return (T)this;

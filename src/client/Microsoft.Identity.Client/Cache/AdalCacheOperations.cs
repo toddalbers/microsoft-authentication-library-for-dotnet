@@ -69,7 +69,7 @@ namespace Microsoft.Identity.Client.Cache
 
                     string[] kvpElements = keyString.Split(new[] { Delimiter }, StringSplitOptions.None);
                     AdalResultWrapper resultEx = AdalResultWrapper.Deserialize(reader.ReadString());
-                    AdalTokenCacheKey key = new AdalTokenCacheKey(kvpElements[0], kvpElements[1], kvpElements[2],
+                    AdalTokenCacheKey key = new AdalTokenCacheKey(new Uri(kvpElements[0]), kvpElements[1], kvpElements[2],
                         (TokenSubjectType)int.Parse(kvpElements[3], CultureInfo.CurrentCulture),
                         resultEx.Result.UserInfo);
 

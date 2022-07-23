@@ -139,7 +139,13 @@ namespace Microsoft.Identity.Client
             {
                 throw new ArgumentNullException(nameof(authorityUri));
             }
-            CommonParameters.AuthorityOverride = AuthorityInfo.FromAuthorityUri(authorityUri, validateAuthority);
+
+            if (!Uri.IsWellFormedUriString(authorityUri, UriKind.Absolute))
+            {
+                throw new ArgumentException(MsalErrorMessage.AuthorityInvalidUriFormat, nameof(authorityUri));
+            }
+
+            CommonParameters.AuthorityOverride = AuthorityInfo.FromAuthorityUri(new Uri(authorityUri), validateAuthority);
             return (T)this;
         }
 
@@ -289,7 +295,7 @@ namespace Microsoft.Identity.Client
             }
 
             AadAuthority aadAuthority = (AadAuthority)ServiceBundle.Config.Authority;
-            string tenantedAuthority = aadAuthority.GetTenantedAuthority(tenantId, true);
+            Uri tenantedAuthority = aadAuthority.GetTenantedAuthority(tenantId, true);
             var newAuthorityInfo = AuthorityInfo.FromAadAuthority(
                 tenantedAuthority,
                 ServiceBundle.Config.Authority.AuthorityInfo.ValidateAuthority);
@@ -312,7 +318,13 @@ namespace Microsoft.Identity.Client
             {
                 throw new ArgumentNullException(nameof(authorityUri));
             }
-            CommonParameters.AuthorityOverride = new AuthorityInfo(AuthorityType.Adfs, authorityUri, validateAuthority);
+
+            if (!Uri.IsWellFormedUriString(authorityUri, UriKind.Absolute))
+            {
+                throw new ArgumentException(MsalErrorMessage.AuthorityInvalidUriFormat, nameof(authorityUri));
+            }
+
+            CommonParameters.AuthorityOverride = new AuthorityInfo(AuthorityType.Adfs, new Uri(authorityUri), validateAuthority);
             return (T)this;
         }
 
@@ -329,7 +341,13 @@ namespace Microsoft.Identity.Client
             {
                 throw new ArgumentNullException(nameof(authorityUri));
             }
-            CommonParameters.AuthorityOverride = new AuthorityInfo(AuthorityType.B2C, authorityUri, false);
+
+            if (!Uri.IsWellFormedUriString(authorityUri, UriKind.Absolute))
+            {
+                throw new ArgumentException(MsalErrorMessage.AuthorityInvalidUriFormat, nameof(authorityUri));
+            }
+
+            CommonParameters.AuthorityOverride = new AuthorityInfo(AuthorityType.B2C, new Uri(authorityUri), false);
             return (T)this;
         }
 

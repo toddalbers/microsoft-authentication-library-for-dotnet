@@ -24,10 +24,10 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
           AuthenticationRequestParameters authenticationRequestParameters,
           WebTokenRequest webTokenRequest,
           ILoggerAdapter logger,
-          string overriddenAuthority = null)
+          Uri overriddenAuthority = null)
         {
             AddExtraParamsToRequest(webTokenRequest, authenticationRequestParameters.ExtraQueryParameters);
-            string authority = overriddenAuthority ??
+            Uri authority = overriddenAuthority ??
                  authenticationRequestParameters.AuthorityManager.OriginalAuthority.AuthorityInfo.CanonicalAuthority;
             bool validate = authenticationRequestParameters.AuthorityInfo.ValidateAuthority;
             AddAuthorityParamToRequest(authority, validate, webTokenRequest);
@@ -112,11 +112,11 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 #endif
         }
 
-        private static void AddAuthorityParamToRequest(string authority, bool validate, WebTokenRequest webTokenRequest)
+        private static void AddAuthorityParamToRequest(Uri authority, bool validate, WebTokenRequest webTokenRequest)
         {
             webTokenRequest.Properties.Add(
                             "authority",
-                            authority);
+                            authority.ToString());
             webTokenRequest.Properties.Add(
                 "validateAuthority",
                 validate ? "yes" : "no");

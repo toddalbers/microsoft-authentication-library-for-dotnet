@@ -32,12 +32,12 @@ namespace Microsoft.Identity.Client.Cache
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     internal sealed class AdalTokenCacheKey : IEquatable<AdalTokenCacheKey>
     {
-        internal AdalTokenCacheKey(string authority, string resource, string clientId, TokenSubjectType tokenSubjectType, AdalUserInfo adalUserInfo)
+        internal AdalTokenCacheKey(Uri authority, string resource, string clientId, TokenSubjectType tokenSubjectType, AdalUserInfo adalUserInfo)
             : this(authority, resource, clientId, tokenSubjectType, adalUserInfo?.UniqueId, adalUserInfo?.DisplayableId)
         {
         }
 
-        internal AdalTokenCacheKey(string authority, string resource, string clientId, TokenSubjectType tokenSubjectType, string uniqueId, string displayableId)
+        internal AdalTokenCacheKey(Uri authority, string resource, string clientId, TokenSubjectType tokenSubjectType, string uniqueId, string displayableId)
         {
             Authority = authority;
             Resource = resource;
@@ -47,7 +47,7 @@ namespace Microsoft.Identity.Client.Cache
             DisplayableId = displayableId;
         }
 
-        public string Authority { get; }
+        public Uri Authority { get; }
 
         /// <summary>
         /// For the purposes of MSAL, the resource is irrelevant, since only RTs can be migrated.

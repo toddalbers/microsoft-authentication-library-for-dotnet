@@ -13,12 +13,12 @@ namespace Microsoft.Identity.Client.Instance
         internal B2CAuthority(AuthorityInfo authorityInfo)
             : base(authorityInfo)
         {
-            TenantId = new Uri(AuthorityInfo.CanonicalAuthority).Segments[2].TrimEnd('/');
+            TenantId = AuthorityInfo.CanonicalAuthority.Segments[2].TrimEnd('/');
         }
 
         internal override string TenantId { get; }
 
-        internal override string GetTenantedAuthority(string tenantId, bool forceTenantless = false)
+        internal override Uri GetTenantedAuthority(string tenantId, bool forceTenantless = false)
         {
             // For B2C, tenant is not changeable
             return AuthorityInfo.CanonicalAuthority;

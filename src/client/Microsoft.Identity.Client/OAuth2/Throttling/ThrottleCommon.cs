@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
 using System.Text;
 using Microsoft.Identity.Client.Core;
@@ -25,7 +26,7 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
         /// </summary>
         public static string GetRequestStrictThumbprint(
             IReadOnlyDictionary<string, string> bodyParams,
-            string authority,
+            Uri authority,
             string homeAccountId)
         {
             StringBuilder sb = new StringBuilder();

@@ -69,18 +69,18 @@ namespace Microsoft.Identity.Client.Instance
                 s_tenantlessTenantNames.Contains(tenantId);
         }
 
-        internal override string GetTenantedAuthority(string tenantId, bool forceSpecifiedTenant = false)
+        internal override Uri GetTenantedAuthority(string tenantId, bool forceSpecifiedTenant = false)
         {
             if (!string.IsNullOrEmpty(tenantId) &&
                 (forceSpecifiedTenant || IsCommonOrganizationsOrConsumersTenant()))
             {
-                var authorityUri = new Uri(AuthorityInfo.CanonicalAuthority);
+                var authorityUri = AuthorityInfo.CanonicalAuthority;
 
-                return string.Format(
+                return new Uri(string.Format(
                     CultureInfo.InvariantCulture,
                     AADCanonicalAuthorityTemplate,
                     authorityUri.Authority,
-                    tenantId);
+                    tenantId));
             }
 
             return AuthorityInfo.CanonicalAuthority;

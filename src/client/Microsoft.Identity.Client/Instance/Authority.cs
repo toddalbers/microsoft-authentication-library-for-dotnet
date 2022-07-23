@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Client.Instance
             return await AuthorityInfo.AuthorityInfoHelper.CreateAuthorityForRequestAsync(requestContext, requestAuthorityInfo, account).ConfigureAwait(false);
         }
 
-        public static Authority CreateAuthority(string authority, bool validateAuthority = false)
+        public static Authority CreateAuthority(Uri authority, bool validateAuthority = false)
         {
             return AuthorityInfo.FromAuthorityUri(authority, validateAuthority).CreateAuthority();
         }
@@ -76,7 +76,7 @@ namespace Microsoft.Identity.Client.Instance
                 return initialAuthority;
             }
 
-            string tenantedAuthority = initialAuthority.GetTenantedAuthority(tenantId);
+            Uri tenantedAuthority = initialAuthority.GetTenantedAuthority(tenantId);
 
             return CreateAuthority(tenantedAuthority, authorityInfo.ValidateAuthority);
         }
@@ -88,7 +88,7 @@ namespace Microsoft.Identity.Client.Instance
                 Host = environment
             };
 
-            return CreateAuthority(uriBuilder.Uri.AbsoluteUri, authorityInfo.ValidateAuthority);
+            return CreateAuthority(uriBuilder.Uri, authorityInfo.ValidateAuthority);
         }
 
         #endregion Builders
@@ -100,7 +100,7 @@ namespace Microsoft.Identity.Client.Instance
         /// Gets a tenanted authority if the current authority is tenant-less.
         /// Returns the original authority on B2C and ADFS
         /// </summary>
-        internal abstract string GetTenantedAuthority(string tenantId, bool forceTenantless = false);
+        internal abstract Uri GetTenantedAuthority(string tenantId, bool forceTenantless = false);
 
         internal abstract string GetTokenEndpoint();
 

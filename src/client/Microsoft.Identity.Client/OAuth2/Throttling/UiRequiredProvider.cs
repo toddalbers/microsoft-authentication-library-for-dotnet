@@ -99,7 +99,7 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
         /// </summary>
         private static string GetRequestStrictThumbprint(
             IReadOnlyDictionary<string, string> bodyParams,
-            string authority,
+            Uri authority,
             ICryptographyManager crypto)
         {
             StringBuilder sb = new StringBuilder();

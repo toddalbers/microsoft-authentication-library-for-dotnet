@@ -76,7 +76,7 @@ namespace Microsoft.Identity.Client
         /// Gets Azure AD tenant ID.
         /// </summary>
         public string GetTenantId() => Instance.Authority
-                                               .CreateAuthority(Authority, validateAuthority: true)
+                                               .CreateAuthority(new Uri(Authority), validateAuthority: true)
                                                .TenantId;
 
         /// <summary>

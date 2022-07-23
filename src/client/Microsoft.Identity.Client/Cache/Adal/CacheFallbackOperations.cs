@@ -23,7 +23,7 @@ namespace Microsoft.Identity.Client.Cache
             ILegacyCachePersistence legacyCachePersistence,
             MsalRefreshTokenCacheItem rtItem,
             MsalIdTokenCacheItem idItem,
-            string authority,
+            Uri authority,
             string uniqueId,
             string scope)
         {
@@ -76,7 +76,7 @@ namespace Microsoft.Identity.Client.Cache
                     logger.Error(DifferentEnvError);
                 }
 
-                if (!string.Equals(rtItem?.Environment, new Uri(authority).Host, StringComparison.OrdinalIgnoreCase))
+                if (!string.Equals(rtItem?.Environment, authority.Host, StringComparison.OrdinalIgnoreCase))
                 {
                     logger.Error(DifferentAuthorityError);
                 }
@@ -106,12 +106,12 @@ namespace Microsoft.Identity.Client.Cache
                 // filter by client id
                 dictionary.Where(p =>
                         p.Key.ClientId.Equals(clientId, StringComparison.OrdinalIgnoreCase) &&
-                        !string.IsNullOrEmpty(p.Key.Authority))
+                        p.Key.Authority != null)
                         .ToList()
                         .ForEach(kvp =>
                             {
                                 userEntries.Add(new AdalUserForMsalEntry(
-                                    authority: kvp.Key.Authority,
+                                    authority: kvp.Key.Authority.ToString(),
                                     clientId: clientId,
                                     clientInfo: kvp.Value.RawClientInfo, // optional, missing in ADAL v3
                                     userInfo: kvp.Value.Result.UserInfo));
@@ -245,7 +245,7 @@ namespace Microsoft.Identity.Client.Cache
                 IEnumerable<KeyValuePair<AdalTokenCacheKey, AdalResultWrapper>> listToProcess =
                     dictionary.Where(p =>
                         p.Key.ClientId.Equals(clientId, StringComparison.OrdinalIgnoreCase) &&
-                        environmentAliases.Contains(new Uri(p.Key.Authority).Host));
+                        environmentAliases.Contains(p.Key.Authority.Host));
 
                 bool filtered = false;
                 
@@ -275,7 +275,7 @@ namespace Microsoft.Identity.Client.Cache
                 }
 
                 return listToProcess.Select(adalEntry => new MsalRefreshTokenCacheItem(
-                      new Uri(adalEntry.Key.Authority).Host,
+                      adalEntry.Key.Authority.Host,
                       adalEntry.Key.ClientId,
                       adalEntry.Value.RefreshToken,
                       adalEntry.Value.RawClientInfo,

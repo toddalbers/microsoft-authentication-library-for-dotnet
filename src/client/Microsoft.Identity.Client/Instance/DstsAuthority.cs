@@ -26,18 +26,18 @@ namespace Microsoft.Identity.Client.Instance
             TenantId = AuthorityInfo.GetSecondPathSegment(AuthorityInfo.CanonicalAuthority);
         }
 
-        internal override string GetTenantedAuthority(string tenantId, bool forceSpecifiedTenant = false)
+        internal override Uri GetTenantedAuthority(string tenantId, bool forceSpecifiedTenant = false)
         {
             if (!string.IsNullOrEmpty(tenantId) &&
                 (forceSpecifiedTenant || AadAuthority.IsCommonOrganizationsOrConsumersTenant(TenantId)))
             {
-                var authorityUri = new Uri(AuthorityInfo.CanonicalAuthority);
+                var authorityUri = AuthorityInfo.CanonicalAuthority;
 
-                return string.Format(
+                return new Uri(string.Format(
                     CultureInfo.InvariantCulture,
                     DstsCanonicalAuthorityTemplate,
                     authorityUri.Authority,
-                    tenantId);
+                    tenantId));
             }
 
             return AuthorityInfo.CanonicalAuthority;
