@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using Microsoft.Identity.Client;
@@ -11,6 +12,22 @@ using Microsoft.IdentityModel.Abstractions;
 
 namespace Microsoft.Identity.Test.Common.Core.Helpers
 {
+    public class TestIdentityLogger : IIdentityLogger
+    {
+        public List<LogEntry> Entries { get; } = new List<LogEntry>();
+
+        public bool IsEnabled(EventLogLevel eventLogLevel)
+        {
+            return true;
+        }
+
+        public void Log(LogEntry entry)
+        {
+            Entries.Add(entry);
+        }
+    }
+
+  
     internal class TraceLogger : ILoggerAdapter
     {
         private readonly string _prefix;

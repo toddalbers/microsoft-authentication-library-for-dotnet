@@ -49,8 +49,27 @@ namespace NetCoreTestApp
 
         private static int s_currentTid = 0;
 
+        public interface ITelemetryClient { void Foo(); }
+        public class MsalTelemClient : ITelemetryClient
+        {
+            public void Foo()
+            {
+                Console.WriteLine("Foo");
+            }
+        }
+
+        public static void Try(params ITelemetryClient[] telemetryClients)
+        {
+            foreach (var tc in telemetryClients)
+            {
+                tc.Foo();
+            }
+        }
+
         public static void Main(string[] args)
         {
+            Try();
+
             var ccaSettings = ConfidentialAppSettings.GetSettings(Cloud.Public);
             s_clientIdForConfidentialApp = ccaSettings.ClientId;
             s_ccaAuthority = ccaSettings.Authority;

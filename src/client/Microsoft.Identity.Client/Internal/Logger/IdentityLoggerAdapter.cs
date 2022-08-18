@@ -29,10 +29,15 @@ namespace Microsoft.Identity.Client.Internal.Logger
         {
             ClientName = clientName;
             ClientVersion = clientVersion;
-            IdentityLogger = new IdentityLogger(identityLogger, correlationId, clientName, clientVersion, enablePiiLogging);
+            IdentityLogger = new IdentityLogger(
+                identityLogger, 
+                correlationId, 
+                clientName, 
+                clientVersion, 
+                enablePiiLogging);
             _correlationId = correlationId.Equals(Guid.Empty)
                     ? string.Empty
-                    : " - " + correlationId;
+                    : correlationId.ToString("D");
             
             PiiLoggingEnabled = enablePiiLogging;
         }

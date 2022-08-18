@@ -9,8 +9,11 @@ using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Logger;
 using Microsoft.Identity.Test.Common;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
+using Microsoft.IdentityModel.Abstractions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 
@@ -28,8 +31,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             TestCommon.ResetInternalStaticCaches();
 
             // Methods in CacheFallbackOperations silently catch all exceptions and log them;
-            // By setting this to null, logging will fail, making the test fail.
-            _logger = Substitute.For<ILoggerAdapter>();
+            var testLogger = new TestIdentityLogger();
+            _logger = new IdentityLoggerAdapter(testLogger, Guid.NewGuid(), "", "", true);
 
             // Use the net45 accessor for tests
             _legacyCachePersistence = new InMemoryLegacyCachePersistence();
@@ -414,7 +417,10 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             // Assert
             AssertCacheEntryCount(6);
 
-            _logger.Received().Error(Arg.Is<string>(MsalErrorMessage.InternalErrorCacheEmptyUsername));
+            Assert.IsTrue(
+                (_logger.IdentityLogger as TestIdentityLogger).Entries.Any(entry =>
+                 entry.EventLogLevel == EventLogLevel.Error &&
+                 entry.Message.Contains(MsalErrorMessage.InternalErrorCacheEmptyUsername)));
         }
 
         [TestMethod]
@@ -493,9 +499,15 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 "scope1");
 
             // Assert
-            _logger.Received().Error(Arg.Is<string>(CacheFallbackOperations.DifferentAuthorityError));
+            Assert.IsTrue(
+                (_logger.IdentityLogger as TestIdentityLogger).Entries.Any(entry =>
+                    entry.EventLogLevel == EventLogLevel.Error &&
+                    entry.Message.Contains(CacheFallbackOperations.DifferentAuthorityError)));
 
-            _logger.Received().Error(Arg.Is<string>(CacheFallbackOperations.DifferentEnvError));
+            Assert.IsTrue(
+               (_logger.IdentityLogger as TestIdentityLogger).Entries.Any(entry =>
+                   entry.EventLogLevel == EventLogLevel.Error &&
+                   entry.Message.Contains(CacheFallbackOperations.DifferentAuthorityError)));
         }
 
         [TestMethod]

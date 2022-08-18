@@ -82,7 +82,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
         {
             return string.Format(
                 CultureInfo.InvariantCulture,
-                "{0} MSAL {1} {2} {3} {4} [{5}{6}]{7} {8}",
+                "{0} MSAL {1} {2} {3} {4} [{5}-{6}]{7} {8}",
                 piiEnabled,
                 s_msalVersionLazy.Value,
                 s_skuLazy.Value,

@@ -167,7 +167,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
             // Assert
             Assert.AreSame(validationException, actualException);
-            _knownMetadataProvider.DidNotReceiveWithAnyArgs();
+            _knownMetadataProvider.DidNotReceiveWithAnyArgs().GetMetadata(null, null, null);
         }
 
         [TestMethod]
