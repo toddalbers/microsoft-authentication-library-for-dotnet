@@ -73,25 +73,25 @@ steps:
 #       dotnet workload install maui --source https://aka.ms/dotnet6/nuget/index.json --source https://api.nuget.org/v3/index.json
 #       dotnet workload install android ios maccatalyst tvos macos maui wasm-tools --source https://aka.ms/dotnet6/nuget/index.json --source https://api.nuget.org/v3/index.json
 
-- task: DotNetCoreCLI@2
-  displayName: 'dotnet workload restore for Identity.Client'
-  inputs:
-    command: 'custom'
-    custom: 'workload'
-    arguments: 'restore $(MsalSourceDir)src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj'
+#- task: DotNetCoreCLI@2
+#  displayName: 'dotnet workload restore for Identity.Client'
+#  inputs:
+#    command: 'custom'
+#    custom: 'workload'
+#    arguments: 'restore $(MsalSourceDir)src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj'
 
-- task: DotNetCoreCLI@2
-  displayName: 'dotnet workload restore'
-  inputs:
-    command: 'custom'
-    custom: 'workload'
-    arguments: 'restore $(MsalSourceDir)src\client\Microsoft.Identity.Client.Desktop\Microsoft.Identity.Client.Desktop.csproj'
+#- task: DotNetCoreCLI@2
+#  displayName: 'dotnet workload restore'
+#  inputs:
+#    command: 'custom'
+#    custom: 'workload'
+#    arguments: 'restore $(MsalSourceDir)src\client\Microsoft.Identity.Client.Desktop\Microsoft.Identity.Client.Desktop.csproj'
 
 - task: MSBuild@1
   displayName: 'Restore using MSBuild'
   inputs:
     solution: '${{ parameters.Solution }}'
-    msbuildVersion: 17.0
+    msbuildVersion: 17.3
     msbuildLocationMethod: 'location'
     msbuildLocation: '$(MSBuildPath)'
     msbuildArguments: '-restore'
@@ -100,17 +100,17 @@ steps:
     maximumCpuCount: true
 
 
-# - task: MSBuild@1
-#   displayName: 'Build using MSBuild'
-#   inputs:
-#     solution: '${{ parameters.Solution }}'
-#     msbuildVersion: 17.0
-#     msbuildLocationMethod: 'location'
-#     msbuildLocation: '$(MSBuildPath)'
-#     msbuildArguments: '/p:RunCodeAnalysis=false /p:MsalClientSemVer=${{ parameters.MsalClientSemVer }} /p:SourceLinkCreate=true /p:ContinousIntegrationBuild=true'
-#     platform: ${{ parameters.BuildPlatform }}
-#     configuration: ${{ parameters.BuildConfiguration }}
-#     maximumCpuCount: true
+- task: MSBuild@1
+  displayName: 'Build using MSBuild'
+  inputs:
+    solution: '${{ parameters.Solution }}'
+    msbuildVersion: 17.3
+    msbuildLocationMethod: 'location'
+    msbuildLocation: '$(MSBuildPath)'
+    msbuildArguments: '/p:RunCodeAnalysis=false /p:MsalClientSemVer=${{ parameters.MsalClientSemVer }} /p:SourceLinkCreate=true /p:ContinousIntegrationBuild=true'
+    platform: ${{ parameters.BuildPlatform }}
+    configuration: ${{ parameters.BuildConfiguration }}
+    maximumCpuCount: true
 
 # this cannot find iOS
 # - task: VSBuild@1
