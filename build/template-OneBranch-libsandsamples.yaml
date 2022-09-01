@@ -44,20 +44,23 @@ steps:
     performMultiLevelLookup: true
 
 - task: UseDotNet@2
-  displayName: Use .NET 6.0
+  displayName: 'Use .NET Core sdk'
   inputs:
-    packageType: 'sdk'
-    version: '6.x'
+    packageType: sdk
+    version: 6.0.x
+    installationPath: $(Agent.ToolsDirectory)/dotnet
 
 - task: CmdLine@2
   displayName: 'dotnet clear'
   inputs:
     script: 'dotnet nuget locals all --clear' 
 
-- task: CmdLine@2
-  displayName: 'dotnet install maui'
+- task: PowerShell@2
+  displayName: 'Install .NET 6 and MAUI workload'
   inputs:
-    script: 'dotnet workload install maui --source https://aka.ms/dotnet6/nuget/index.json --source https://api.nuget.org/v3/index.json' 
+    targetType: 'inline'
+    script: |
+      dotnet workload install maui-windows;
 
 - task: CmdLine@2
   displayName: 'dotnet install other workloads'
@@ -80,37 +83,38 @@ steps:
 #    custom: 'workload'
 #    arguments: 'restore $(MsalSourceDir)src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj'
 
+- task: DotNetCoreCLI@2
+  displayName: 'Restore Reality.Studio.Apps.Shell.Maui'
+  inputs:
+    command: 'restore'
+    projects: '$(MsalSourceDir)src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj'
+    
+- task: DotNetCoreCLI@2
+  displayName: 'Restore Reality.Studio.Apps.Shell.Maui'
+  inputs:
+    command: 'restore'
+    projects: '$(MsalSourceDir)src\client\Microsoft.Identity.Client.Desktop\Microsoft.Identity.Client.Desktop.csproj'
+    
+- task: DotNetCoreCLI@2
+  displayName: 'Build MSAL'
+  inputs:
+    command: 'build'
+    projects: '$(MsalSourceDir)src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj'
+    arguments: '--no-restore -c $(BuildConfiguration)'
+    
+- task: DotNetCoreCLI@2
+  displayName: 'Build MSAL'
+  inputs:
+    command: 'build'
+    projects: '$(MsalSourceDir)src\client\Microsoft.Identity.Client.Desktop\Microsoft.Identity.Client.Desktop.csproj'
+    arguments: '--no-restore -c $(BuildConfiguration)'
+
 #- task: DotNetCoreCLI@2
 #  displayName: 'dotnet workload restore'
 #  inputs:
 #    command: 'custom'
 #    custom: 'workload'
 #    arguments: 'restore $(MsalSourceDir)src\client\Microsoft.Identity.Client.Desktop\Microsoft.Identity.Client.Desktop.csproj'
-
-- task: MSBuild@1
-  displayName: 'Restore using MSBuild'
-  inputs:
-    solution: '${{ parameters.Solution }}'
-    msbuildVersion: 17.3
-    msbuildLocationMethod: 'location'
-    msbuildLocation: '$(MSBuildPath)'
-    msbuildArguments: '-restore'
-    platform: ${{ parameters.BuildPlatform }}
-    configuration: ${{ parameters.BuildConfiguration }}
-    maximumCpuCount: true
-
-
-- task: MSBuild@1
-  displayName: 'Build using MSBuild'
-  inputs:
-    solution: '${{ parameters.Solution }}'
-    msbuildVersion: 17.3
-    msbuildLocationMethod: 'location'
-    msbuildLocation: '$(MSBuildPath)'
-    msbuildArguments: '/p:RunCodeAnalysis=false /p:MsalClientSemVer=${{ parameters.MsalClientSemVer }} /p:SourceLinkCreate=true /p:ContinousIntegrationBuild=true'
-    platform: ${{ parameters.BuildPlatform }}
-    configuration: ${{ parameters.BuildConfiguration }}
-    maximumCpuCount: true
 
 # this cannot find iOS
 # - task: VSBuild@1
@@ -120,14 +124,6 @@ steps:
 #     msbuildArgs: '-restore'
 #     platform: ${{ parameters.BuildPlatform }}
 #     configuration: ${{ parameters.BuildConfiguration }}
-
-- task: VSBuild@1
-  displayName: 'Build solution ${{ parameters.Solution }}'
-  inputs:
-    solution: ${{ parameters.Solution }}
-    msbuildArgs: '/p:RunCodeAnalysis=false /p:MsalClientSemVer=${{ parameters.MsalClientSemVer }} /p:SourceLinkCreate=true /p:ContinousIntegrationBuild=true'
-    platform: ${{ parameters.BuildPlatform }}
-    configuration: ${{ parameters.BuildConfiguration }}
 
 # Run Post-build code analysis (e.g. Roslyn)
 - template: template-postbuild-code-analysis.yaml
