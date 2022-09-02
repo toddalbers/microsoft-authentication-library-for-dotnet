@@ -16,10 +16,11 @@ steps:
 
 - powershell: 'powershell.exe -File "$(MsalSourceDir)build\InstallAndroid.ps1" -ExecutionPolicy Bypass'
   displayName: 'Install Android'
-
+    
 - template: /SharedComponents/OneBranch/Steps/Prepare.MSBuild.yml@templates
   parameters:
-    msBuildVersion: 17.0
+    msBuildVersion: 17.3
+    dropSourcePath: cloudbuild.tools.msbuild/20220810.7/17975172
     msbuildInstallationPath: c:\.vs
     includeReferenceAssemblies: 'true'
 
@@ -28,7 +29,6 @@ steps:
   displayName: 'Use .Net Core SDK 3.x'
   inputs:
     version: 3.x
-
 
 # Use the latest .NET SDK
 - task: UseDotNet@2
@@ -94,7 +94,6 @@ steps:
   displayName: 'Build using MSBuild'
   inputs:
     solution: '${{ parameters.Solution }}'
-    msbuildVersion: 17.0
     msbuildLocationMethod: 'location'
     msbuildLocation: '$(MSBuildPath)'
     msbuildArguments: '/p:RunCodeAnalysis=false /p:MsalClientSemVer=${{ parameters.MsalClientSemVer }} /p:SourceLinkCreate=true /p:ContinousIntegrationBuild=true'
