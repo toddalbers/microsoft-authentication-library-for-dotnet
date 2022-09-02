@@ -87,8 +87,9 @@ steps:
 - task: DotNetCoreCLI@2
   displayName: 'Restore solution ${{ parameters.Solution }}'
   inputs:
-    command: 'restore'
-    solution: ${{ parameters.Solution }}
+    command: 'custom'
+    custom: 'workload'
+    arguments: 'restore ${{ parameters.Solution }}'
     
 - task: VSBuild@1
   displayName: 'Build solution ${{ parameters.Solution }}'
