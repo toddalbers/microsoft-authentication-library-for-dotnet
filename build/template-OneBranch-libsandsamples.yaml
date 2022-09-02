@@ -19,7 +19,7 @@ steps:
 
 - template: /SharedComponents/OneBranch/Steps/Prepare.MSBuild.yml@templates
   parameters:
-    msBuildVersion: 17.3
+    msBuildVersion: 17.0
     msbuildInstallationPath: c:\.vs
     includeReferenceAssemblies: 'true'
 
@@ -94,7 +94,7 @@ steps:
   displayName: 'Build using MSBuild'
   inputs:
     solution: '${{ parameters.Solution }}'
-    msbuildVersion: 17.3
+    msbuildVersion: 17.0
     msbuildLocationMethod: 'location'
     msbuildLocation: '$(MSBuildPath)'
     msbuildArguments: '/p:RunCodeAnalysis=false /p:MsalClientSemVer=${{ parameters.MsalClientSemVer }} /p:SourceLinkCreate=true /p:ContinousIntegrationBuild=true'
