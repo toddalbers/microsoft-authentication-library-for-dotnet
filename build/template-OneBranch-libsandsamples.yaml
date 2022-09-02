@@ -82,34 +82,6 @@ steps:
 #    command: 'custom'
 #    custom: 'workload'
 #    arguments: 'restore $(MsalSourceDir)src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj'
-
-- task: DotNetCoreCLI@2
-  displayName: 'Restore MSAL project'
-  inputs:
-    command: 'restore'
-    projects: '$(MsalSourceDir)src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj'
-    
-- task: DotNetCoreCLI@2
-  displayName: 'Restore Msal Desktop project'
-  inputs:
-    command: 'restore'
-    projects: '$(MsalSourceDir)src\client\Microsoft.Identity.Client.Desktop\Microsoft.Identity.Client.Desktop.csproj'
-    
-- task: VSBuild@1
-  displayName: 'Build MSAL project'
-  inputs:
-    projects: '$(MsalSourceDir)src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj'
-    msbuildArgs: '/p:RunCodeAnalysis=false /p:MsalClientSemVer=${{ parameters.MsalClientSemVer }} /p:SourceLinkCreate=true /p:ContinousIntegrationBuild=true'
-    platform: ${{ parameters.BuildPlatform }}
-    configuration: ${{ parameters.BuildConfiguration }}
-    
-- task: VSBuild@1
-  displayName: 'Build MSAL Desktop project'
-  inputs:
-    projects: '$(MsalSourceDir)src\client\Microsoft.Identity.Client.Desktop\Microsoft.Identity.Client.Desktop.csproj'
-    msbuildArgs: '/p:RunCodeAnalysis=false /p:MsalClientSemVer=${{ parameters.MsalClientSemVer }} /p:SourceLinkCreate=true /p:ContinousIntegrationBuild=true'
-    platform: ${{ parameters.BuildPlatform }}
-    configuration: ${{ parameters.BuildConfiguration }}
     
 - task: DotNetCoreCLI@2
   displayName: 'Restore solution ${{ parameters.Solution }}'
