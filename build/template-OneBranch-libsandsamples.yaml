@@ -21,7 +21,7 @@ steps:
   parameters:
     msBuildVersion: 17.3
     dropSourcePath: cloudbuild.tools.msbuild/20220810.7/17975172
-    msbuildInstallationPath: c:\.vs
+    msbuildInstallationPath: C:\Program Files\Microsoft Visual Studio\2019\Enterprise\MSBuild
     includeReferenceAssemblies: 'true'
     microsoftSdks:
       - 'Azure/.NET SDK/v2.9/Xamarin/Xamarin.iOS/MonoAndroid'
@@ -51,7 +51,6 @@ steps:
   inputs:
     packageType: sdk
     version: 6.0.x
-    installationPath: $(Agent.ToolsDirectory)/dotnet
 
 - task: CmdLine@2
   displayName: 'dotnet clear'
