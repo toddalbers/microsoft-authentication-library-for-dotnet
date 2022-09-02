@@ -6,6 +6,7 @@ parameters:
   BuildConfiguration: 'release'
   MsalClientSemVer: '4.0.0-devopsbuild'
   MsalSourceDir: 'microsoft-authentication-library-for-dotnet\' #Default MSAL Location
+  Solution: 'LibsAndSamples.sln'
 
 steps:
 # - task: CmdLine@2
