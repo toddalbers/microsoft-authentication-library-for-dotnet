@@ -74,7 +74,7 @@ steps:
     targetType: 'inline'
     script: |
       Set-Location "C:\Program Files (x86)\Microsoft Visual Studio\Installer\"
-      $InstallPath = "C:\Program Files\Microsoft Visual Studio\2022\Enterprise"
+      $InstallPath = "C:\Program Files\Microsoft Visual Studio\2019\Enterprise"
       $componentsToAdd = @(
           "Component.Xamarin"
       )
