@@ -21,10 +21,13 @@ steps:
   parameters:
     msBuildVersion: 17.3
     dropSourcePath: cloudbuild.tools.msbuild/20220810.7/17975172
-    msbuildInstallationPath: C:\Program Files\Microsoft Visual Studio\2019\Enterprise\MSBuild
+    msbuildInstallationPath: C:\.vs
     includeReferenceAssemblies: 'true'
     microsoftSdks:
-      - 'Azure/.NET SDK/v2.9/Xamarin/Xamarin.iOS/MonoAndroid'
+      - 'Azure/.NET SDK/v2.9'
+      - 'Xamarin'
+      - 'Xamarin.iOS'
+      - 'MonoAndroid'
 
 # Unit tests require .NET 3.x
 - task: UseDotNet@2
