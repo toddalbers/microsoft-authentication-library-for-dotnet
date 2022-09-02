@@ -95,19 +95,17 @@ steps:
     command: 'restore'
     projects: '$(MsalSourceDir)src\client\Microsoft.Identity.Client.Desktop\Microsoft.Identity.Client.Desktop.csproj'
     
-- task: DotNetCoreCLI@2
-  displayName: 'Build MSAL'
+- task: MSBuild@1
+  displayName: 'Build using MSBuild'
   inputs:
-    command: 'build'
-    projects: '$(MsalSourceDir)src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj'
-    arguments: '--no-restore -c $(BuildConfiguration)'
-    
-- task: DotNetCoreCLI@2
-  displayName: 'Build MSAL'
-  inputs:
-    command: 'build'
-    projects: '$(MsalSourceDir)src\client\Microsoft.Identity.Client.Desktop\Microsoft.Identity.Client.Desktop.csproj'
-    arguments: '--no-restore -c $(BuildConfiguration)'
+    solution: '${{ parameters.Solution }}'
+    msbuildVersion: 17.3
+    msbuildLocationMethod: 'location'
+    msbuildLocation: '$(MSBuildPath)'
+    msbuildArguments: '/p:RunCodeAnalysis=false /p:MsalClientSemVer=${{ parameters.MsalClientSemVer }} /p:SourceLinkCreate=true /p:ContinousIntegrationBuild=true'
+    platform: ${{ parameters.BuildPlatform }}
+    configuration: ${{ parameters.BuildConfiguration }}
+    maximumCpuCount: true
 
 #- task: DotNetCoreCLI@2
 #  displayName: 'dotnet workload restore'
