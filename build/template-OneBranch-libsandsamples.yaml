@@ -89,7 +89,7 @@ steps:
 #    arguments: 'restore $(MsalSourceDir)src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj'
     
 - task: CmdLine@2
-  displayName: 'dotnet clear'
+  displayName: 'dotnet Work Loads'
   inputs:
     script: 'dotnet workload list' 
     
