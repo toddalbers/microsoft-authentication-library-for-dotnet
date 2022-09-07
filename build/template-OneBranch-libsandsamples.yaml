@@ -97,24 +97,15 @@ steps:
   displayName: 'Dir'
   inputs:
     script: |
-      dir "C:\Program Files\Microsoft Visual Studio\2019\"
-      echo main
-      dir "C:\Program Files\Microsoft Visual Studio"
-      echo program---------------------------------------------------------------------
-      dir "C:\Program Files\"
-      echo x69---------------------------------------------------------------------------
-      dir "C:\Program Files\MSBuild"
-      dir "c:\.vs"
+      dir /s /AD "C:\Program Files\MSBuild"
+      dir /s /AD "c:\.vs"
       
 - task: CmdLine@2
   displayName: 'Dir'
   inputs:
     script: |
-      dir "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\msbuild\17.0\MSBuild\Xamarin\iOS\"
-      dir "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\msbuild\17.0\MSBuild\Xamarin\"
-      dir "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\msbuild\17.0\MSBuild\"
-      dir "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\msbuild\17.0"
-      dir "c:\.vs"
+      dir /s "C:\Program Files\MSBuild"
+      dir /s "c:\.vs"
     
 - task: DotNetCoreCLI@2
   displayName: 'Restore solution ${{ parameters.Solution }}'
