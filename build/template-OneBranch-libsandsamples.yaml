@@ -93,6 +93,16 @@ steps:
   inputs:
     script: 'dotnet workload list' 
     
+- task: CmdLine@2
+  displayName: 'Dir'
+  inputs:
+    script: |
+      dir "C:\Program Files\Microsoft Visual Studio\2019\Enterprise\MSBuild\msbuild\17.3\MSBuild\Xamarin\iOS\"
+      dir "C:\Program Files\Microsoft Visual Studio\2019\Enterprise\MSBuild\msbuild\17.3\MSBuild\Xamarin\"
+      dir "C:\Program Files\Microsoft Visual Studio\2019\Enterprise\MSBuild\msbuild\17.3\MSBuild\"
+      dir "C:\Program Files\Microsoft Visual Studio\2019\Enterprise\MSBuild\msbuild\17.3"
+      dir "c:\.vs"
+    
 - task: DotNetCoreCLI@2
   displayName: 'Restore solution ${{ parameters.Solution }}'
   inputs:
