@@ -103,7 +103,7 @@ steps:
       echo program---------------------------------------------------------------------
       dir "C:\Program Files\"
       echo x69---------------------------------------------------------------------------
-      dir "C:\Program Files(x86)\"
+      dir "C:\Program Files\MSBuild"
       dir "c:\.vs"
       
 - task: CmdLine@2
