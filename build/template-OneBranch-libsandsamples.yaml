@@ -97,10 +97,13 @@ steps:
   displayName: 'Dir'
   inputs:
     script: |
-      dir "C:\Program Files\Microsoft Visual Studio\2019\Enterprise\MSBuild\msbuild\17.0\MSBuild\Xamarin\iOS\"
-      dir "C:\Program Files\Microsoft Visual Studio\2019\Enterprise\MSBuild\msbuild\17.0\MSBuild\Xamarin\"
-      dir "C:\Program Files\Microsoft Visual Studio\2019\Enterprise\MSBuild\msbuild\17.0\MSBuild\"
-      dir "C:\Program Files\Microsoft Visual Studio\2019\Enterprise\MSBuild\msbuild"
+      dir "C:\Program Files\Microsoft Visual Studio\2019\"
+      echo main
+      dir "C:\Program Files\Microsoft Visual Studio"
+      echo program---------------------------------------------------------------------
+      dir "C:\Program Files\"
+      echo x69---------------------------------------------------------------------------
+      dir "C:\Program Files(x86)\"
       dir "c:\.vs"
       
 - task: CmdLine@2
