@@ -88,6 +88,13 @@ steps:
 #    custom: 'workload'
 #    arguments: 'restore $(MsalSourceDir)src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj'
     
+- task: CmdLine@2
+  displayName: 'Dir installer'
+  inputs:
+    script: |
+      dir "C:\Program Files (x86)"
+      dir /s /AD "C:\Program Files (x86)\Microsoft Visual Studio"
+    
 - task: PowerShell@2
   displayName: 'Installing Xamarin iOS/macOS components'
   inputs:
