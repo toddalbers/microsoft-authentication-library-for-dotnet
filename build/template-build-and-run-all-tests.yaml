@@ -11,6 +11,8 @@ jobs: #Build and stage projects
       - visualstudio
   variables:
       runCodesignValidationInjection: false
+      
+  container: mcr.microsoft.com/windows/servercore:ltsc2022-KB5017316
 
   steps:
   #Pre build analysis
