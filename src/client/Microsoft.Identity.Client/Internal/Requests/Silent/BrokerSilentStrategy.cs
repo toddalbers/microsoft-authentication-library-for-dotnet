@@ -39,6 +39,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
         {
+            _logger.Verbose("BrokerSilentStrategy::ExecuteAsync starting");
+            
             if (!Broker.IsBrokerInstalledAndInvokable(_authenticationRequestParameters.AuthorityInfo.AuthorityType))
             {
                 if(_authenticationRequestParameters.PopAuthenticationConfiguration != null)
@@ -46,7 +48,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     throw new MsalClientException(MsalError.BrokerApplicationRequired, MsalErrorMessage.CannotInvokeBrokerForPop);
                 }
 
-                _logger.Warning("Broker is not installed or authority type is incorrecr. Cannot respond to silent request.");
+                _logger.Warning("Broker is not installed or authority type is incorrect. Cannot respond to silent request.");
                 return null;
             }
 

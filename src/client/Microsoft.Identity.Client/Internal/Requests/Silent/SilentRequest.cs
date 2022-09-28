@@ -48,59 +48,25 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
             bool isBrokerConfigured = AuthenticationRequestParameters.AppConfig.IsBrokerEnabled &&
                                       ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth();
 
-            if (isBrokerConfigured && AuthenticationRequestParameters.PopAuthenticationConfiguration != null)
+            if (isBrokerConfigured)
             {
                 _logger.Info("[Silent Request] Attempting to use broker instead of searching local cache for Proof-of-Possession tokens. ");
 
                 return await _brokerStrategyLazy.Value.ExecuteAsync(cancellationToken).ConfigureAwait(false);
             }
 
-            try
+            if (AuthenticationRequestParameters.Account == null)
             {
-                if (AuthenticationRequestParameters.Account == null)
-                {
-                    _logger.Verbose("No account passed to AcquireTokenSilent. ");
-                    throw new MsalUiRequiredException(
-                       MsalError.UserNullError,
-                       MsalErrorMessage.MsalUiRequiredMessage,
-                       null,
-                       UiRequiredExceptionClassification.AcquireTokenSilentFailed);
-                }
-
-                _logger.Verbose("Attempting to acquire token using using local cache...");
-                return await _clientStrategy.ExecuteAsync(cancellationToken).ConfigureAwait(false);
-
+                _logger.Verbose("No account passed to AcquireTokenSilent. ");
+                throw new MsalUiRequiredException(
+                   MsalError.UserNullError,
+                   MsalErrorMessage.MsalUiRequiredMessage,
+                   null,
+                   UiRequiredExceptionClassification.AcquireTokenSilentFailed);
             }
-            catch (MsalException ex)
-            {
-                _logger.Verbose($"Token cache could not satisfy silent request.");
 
-                if (isBrokerConfigured && ShouldTryWithBrokerError(ex.ErrorCode))
-                {
-                    _logger.Info("Attempting to use broker instead. ");
-                    var brokerResult = await _brokerStrategyLazy.Value.ExecuteAsync(cancellationToken).ConfigureAwait(false);
-                    if (brokerResult != null)
-                    {
-                        _logger.Verbose("Broker responded to silent request");
-                        return brokerResult;
-                    }
-                }
-
-                throw;
-            }
-        }
-
-        private static HashSet<string> s_tryWithBrokerErrors = new HashSet<string>(StringComparer.OrdinalIgnoreCase) {
-            MsalError.InvalidGrantError,
-            MsalError.InteractionRequired,
-            MsalError.NoTokensFoundError,
-            MsalError.NoAccountForLoginHint,
-            MsalError.CurrentBrokerAccount
-        };
-
-        private static bool ShouldTryWithBrokerError(string errorCode)
-        {
-            return s_tryWithBrokerErrors.Contains(errorCode);
+            _logger.Verbose("Attempting to acquire token using using local cache...");
+            return await _clientStrategy.ExecuteAsync(cancellationToken).ConfigureAwait(false);
         }
 
         internal new async Task<AuthenticationResult> CacheTokenResponseAndCreateAuthenticationResultAsync(MsalTokenResponse response)
