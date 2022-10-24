@@ -1,0 +1,63 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworkNetStandard>netstandard2.0</TargetFrameworkNetStandard>
+    <TargetFrameworkNetDesktop Condition="$([MSBuild]::IsOsPlatform('Windows'))">net461"</TargetFrameworkNetDesktop>
+    <TargetFrameworkNet6>net6</TargetFrameworkNet6>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <TargetFrameworks>$(TargetFrameworkNet6);$(TargetFrameworkNetStandard);$(TargetFrameworkNetDesktop)</TargetFrameworks>
+    <Configurations>Debug;Release</Configurations>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ContinuousIntegrationBuild Condition="'$(TF_BUILD)' == 'true'">true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+  
+  <PropertyGroup Label="NuGet and AssemblyInfo metadata">
+    <!--This should be passed from the VSTS build-->
+    <MsalClientSemVer Condition="'$(MsalClientSemVer)' == ''">4.46.0</MsalClientSemVer>
+    <!--This will generate AssemblyVersion, AssemblyFileVersion and AssemblyInformationVersion-->
+    <Version>$(MsalClientSemVer)</Version>
+    <!-- Copyright needs to be in the form of © not (c) to be compliant -->
+    <Title>MSAL.NET confidential client flows</Title>
+    <Copyright>© Microsoft Corporation. All rights reserved.</Copyright>
+    <Company>Microsoft Corporation</Company>
+    <Authors>Microsoft</Authors>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://go.microsoft.com/fwlink/?linkid=844761</PackageProjectUrl>
+    <PackageReleaseNotes>The release notes are available at https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/releases and the roadmap at https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki#roadmap. To provide feedback, fill-in the survey at https://ncv.microsoft.com/JrXkdySi0m. </PackageReleaseNotes>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <Description>
+      This package contains binaries needed for confidential client scenarios.
+    </Description>
+    <PackageTags>Microsoft Authentication Library Desktop MSAL Confidential WebApi</PackageTags>
+    <Copyright>© Microsoft Corporation. All rights reserved.</Copyright>
+    <Company>Microsoft Corporation</Company>
+    <Product>Microsoft Authentication Library Confidential Client</Product>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <!-- Build symbol package (.snupkg) to distribute the PDB containing Source Link -->
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <IsPackable>true</IsPackable>
+
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6)'">
+    <IsTrimmable>true</IsTrimmable>
+    <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Microsoft.Identity.Client\Properties\InternalsVisibleTo.cs" Link="Properties\InternalsVisibleTo.cs" />
+    <Compile Include="..\Microsoft.Identity.Client\Properties\InternalsVisibleTo.KeyTokens.cs" Link="Properties\InternalsVisibleTo.KeyTokens.cs" />
+  </ItemGroup>
+  <!--<ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetDesktop)'">
+    <Reference Include="System.Net.Http" />
+  </ItemGroup>-->
+  
+  <ItemGroup Label="Build Tools" Condition="$([MSBuild]::IsOsPlatform('Windows'))">
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
+  </ItemGroup>
+
+</Project>
