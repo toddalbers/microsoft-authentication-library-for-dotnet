@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 using Microsoft.Identity.Test.UIAutomation.Infrastructure;
-using Microsoft.Identity.Test.LabInfrastructure;
+using Microsoft.Identity.Lab.Api;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;

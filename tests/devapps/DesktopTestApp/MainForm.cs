@@ -7,17 +7,12 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Globalization;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
-using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Test.LabInfrastructure;
+using Microsoft.Identity.Lab.Api;
 #pragma warning disable VSTHRD100 // Avoid async void methods
 
 namespace DesktopTestApp
@@ -709,7 +704,7 @@ namespace DesktopTestApp
                 CreateException(exc);
             }
         }
-        
+
         private async Task GetB2CClientIdFromLabAsync()
         {
             if (_b2CClientId != null)

@@ -4,7 +4,8 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Identity.Test.LabInfrastructure;
+using Microsoft.Identity.Lab.Api;
+using Microsoft.Identity.Lab.Api;
 using NUnit.Framework;
 using Xamarin.UITest.Queries;
 
