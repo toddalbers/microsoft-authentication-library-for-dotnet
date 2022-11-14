@@ -51,7 +51,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         // This method tries to create managed identity source for different sources, if none is created then defaults to imds.
         private static ManagedIdentitySource SelectManagedIdentitySource(RequestContext requestContext)
         {
-            return AppServiceManagedIdentitySource.TryCreate(requestContext);
+            return AppServiceManagedIdentitySource.TryCreate(requestContext) ??
+                new ImdsManagedIdentitySource(requestContext);
         }
 
 
