@@ -16,26 +16,21 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 {
     /// <summary>
     /// Class to initialize a managed identity and identify the service.
+    /// Original source of code: https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/identity/Azure.Identity/src/ManagedIdentityClient.cs
     /// </summary>
     internal class ManagedIdentityClient
     {
         internal const string MsiUnavailableError =
-            "ManagedIdentityCredential authentication unavailable. No Managed Identity endpoint found.";
+            "Authentication with managed identity is unavailable. No managed identity endpoint found.";
 
-        private Lazy<ManagedIdentitySource> _identitySource;
-        RequestContext _context;
-
-        protected ManagedIdentityClient()
-        {
-        }
+        private readonly Lazy<ManagedIdentitySource> _identitySource;
 
         public ManagedIdentityClient(RequestContext requestContext)
         {
-            _context = requestContext;
             _identitySource = new Lazy<ManagedIdentitySource>(() => SelectManagedIdentitySource(requestContext));
         }
 
-        public virtual async Task<ManagedIdentityResponse> AuthenticateCoreAsync(AppTokenProviderParameters parameters,
+        private async Task<ManagedIdentityResponse> AuthenticateCoreAsync(AppTokenProviderParameters parameters,
             CancellationToken cancellationToken)
         {
             return await _identitySource.Value.AuthenticateAsync(parameters, cancellationToken).ConfigureAwait(false);
@@ -54,7 +49,5 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             return AppServiceManagedIdentitySource.TryCreate(requestContext) ??
                 new ImdsManagedIdentitySource(requestContext);
         }
-
-
     }
 }

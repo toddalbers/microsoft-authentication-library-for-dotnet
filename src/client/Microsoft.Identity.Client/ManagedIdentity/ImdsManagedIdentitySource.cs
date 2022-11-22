@@ -87,7 +87,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             {
                 return await base.AuthenticateAsync(parameters, cancellationToken).ConfigureAwait(false);
             }
-            catch (MsalServiceException e) when (e.ErrorCode == MsalError.ManagedIdentityFailedResponse)
+            catch (MsalServiceException e) when (e.ErrorCode == MsalError.ManagedIdentityRequestFailed)
             {
                 _requestContext.Logger.Error(NoResponseError);
                 throw;
@@ -100,7 +100,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             catch (AggregateException e)
             {
                 // try to capture if multiple attempts failed for imds
-                throw new MsalServiceException(MsalError.ManagedIdentityFailedResponse, AggregateError, e);
+                throw new MsalServiceException(MsalError.ManagedIdentityRequestFailed, AggregateError, e);
             }
         }
 
@@ -131,7 +131,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     message = message + Environment.NewLine + errorContentMessage;
                 }
 
-                throw new MsalServiceException(MsalError.ManagedIdentityFailedResponse, message);
+                throw new MsalServiceException(MsalError.ManagedIdentityRequestFailed, message);
             }
 
             return base.HandleResponse(parameters, response);

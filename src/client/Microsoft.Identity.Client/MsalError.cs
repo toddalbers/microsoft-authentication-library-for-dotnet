@@ -1105,7 +1105,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Managed Identity error response was received.
         /// </summary>
-        public const string ManagedIdentityRequestFailed = "managed_identity_failed_request";
+        public const string ManagedIdentityRequestFailed = "managed_identity_request_failed";
 
         /// <summary>
         /// Unknown error response received.
@@ -1116,5 +1116,10 @@ namespace Microsoft.Identity.Client
         /// Invalid managed identity endpoint.
         /// </summary>
         public const string InvalidManagedIdentityEndpoint = "invalid_managed_identity_endpoint";
+
+        /// <summary>
+        /// Exactly one scope is expected.
+        /// </summary>
+        public const string ExactlyOneScopeExpected = "exactly_one_scope_expedted";
     }
 }
