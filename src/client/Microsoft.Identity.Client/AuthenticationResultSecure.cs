@@ -1,16 +1,40 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
+// *******************************************************************************************************************
+//
+// ********************** Todd Albers Comment
+//
+// Is there a reason that it should not be using SecureString?
+//
+// Proposed changes below and commented.
+// This is just a suggested modification.
+// In this version I am creating a new class altogether: AuthenticationResultSecure (rather than AuthenticationResult)
+// which would allow Microsoft to add this class without breaking backward compatibility.
+//
+// Other places like HttpClient could also possibly have a corresponding HttpClientSecure which uses SecureString like this also.
+// This is far from complete.  It is submitted as a general idea.  I hope some value comes from it. 
+// If this is not the correct way to submit this idea, my apologies.  Just trying to offer help where i see an opportunity.
+//
+// Thanks - Todd Albers
+//
+// *******************************************************************************************************************
 
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
+using System.Net;
+// ********************** Todd Albers Comment
+using System.Security;  // Added using here.  Necessary for use of SecureString
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
+using Microsoft.Identity.Client.NativeInterop;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
+
 
 namespace Microsoft.Identity.Client
 {
@@ -18,7 +42,7 @@ namespace Microsoft.Identity.Client
     /// Contains the results of one token acquisition operation in <see cref="PublicClientApplication"/>
     /// or ConfidentialClientApplication. For details see https://aka.ms/msal-net-authenticationresult
     /// </summary>
-    public partial class AuthenticationResult
+    public partial class AuthenticationResultSecure
     {
         private readonly IAuthenticationScheme _authenticationScheme;
 
@@ -40,8 +64,10 @@ namespace Microsoft.Identity.Client
         /// <param name="authenticationResultMetadata">Contains metadata related to the Authentication Result.</param>
         /// <param name="claimsPrincipal">Claims from the ID token</param>
         /// <param name="spaAuthCode">Auth Code returned by the Microsoft identity platform when you use AcquireTokenByAuthorizeCode.WithSpaAuthorizationCode(). This auth code is meant to be redeemed by the frontend code.</param>
-        public AuthenticationResult( // for backwards compat with 4.16-
-            string accessToken,
+        public AuthenticationResultSecure( // for backwards compat with 4.16-
+            // ********************** Todd Albers Comment
+            //  Change type from string to SecureString
+            SecureString accessToken,
             bool isExtendedLifeTimeToken,
             string uniqueId,
             DateTimeOffset expiresOn,
@@ -52,7 +78,7 @@ namespace Microsoft.Identity.Client
             IEnumerable<string> scopes,
             Guid correlationId,
             string tokenType = "Bearer",
-            AuthenticationResultMetadata authenticationResultMetadata = null, 
+            AuthenticationResultMetadata authenticationResultMetadata = null,
             ClaimsPrincipal claimsPrincipal = null,
             string spaAuthCode = null)
         {
@@ -92,8 +118,8 @@ namespace Microsoft.Identity.Client
         /// <param name="tokenType">The token type, defaults to Bearer. Note: this property is experimental and may change in future versions of the library.</param>
         /// <remarks>For backwards compatibility with MSAL 4.17-4.20 </remarks>
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public AuthenticationResult(
-          string accessToken,
+        public AuthenticationResultSecure(
+          SecureString accessToken,
           bool isExtendedLifeTimeToken,
           string uniqueId,
           DateTimeOffset expiresOn,
@@ -122,18 +148,18 @@ namespace Microsoft.Identity.Client
 
         }
 
-        internal AuthenticationResult(
+        internal AuthenticationResultSecure(
             MsalAccessTokenCacheItem msalAccessTokenCacheItem,
-            MsalIdTokenCacheItem msalIdTokenCacheItem, 
+            MsalIdTokenCacheItem msalIdTokenCacheItem,
             IAuthenticationScheme authenticationScheme,
             Guid correlationID,
-            TokenSource tokenSource, 
+            TokenSource tokenSource,
             ApiEvent apiEvent,
             Account account,
             string spaAuthCode = null)
         {
             _authenticationScheme = authenticationScheme ?? throw new ArgumentNullException(nameof(authenticationScheme));
-            
+
             string homeAccountId =
                 msalAccessTokenCacheItem?.HomeAccountId ??
                 msalIdTokenCacheItem?.HomeAccountId;
@@ -165,7 +191,13 @@ namespace Microsoft.Identity.Client
 
             if (msalAccessTokenCacheItem != null)
             {
-                AccessToken = authenticationScheme.FormatAccessToken(msalAccessTokenCacheItem);
+                // ********************** Todd Albers Comment
+                // Here FormatAccessToken could possibly have an override that returns 
+                // a type of SecureString rather than string.  I dont know if SecureString
+                // can be implmented deeper in msalAccessTokenCacheItem or not.  msalAccessTokenCacheItemSecure?
+                // And maybe add this FormatAccessTokenSecure method where it returns a SecureString instead of string
+                AccessTokenSecure = authenticationScheme.FormatAccessTokenSecure(msalAccessTokenCacheItem);
+           
                 ExpiresOn = msalAccessTokenCacheItem.ExpiresOn;
                 Scopes = msalAccessTokenCacheItem.ScopeSet;
 
@@ -183,13 +215,50 @@ namespace Microsoft.Identity.Client
             }
         }
 
+        SecureString _accessToken;
         //Default constructor for testing
-        internal AuthenticationResult() { }
+
+        // ********************** Todd Albers Comment
+        // This is where I thought best to intialize the SecureString.
+        internal AuthenticationResultSecure() { _accessToken = new SecureString();  }
 
         /// <summary>
         /// Access Token that can be used as a bearer token to access protected web APIs
         /// </summary>
-        public string AccessToken { get; }
+
+
+        // ********************** Todd Albers Comment
+        // Added this setter and getter of SecureString.
+        public SecureString AccessTokenSecure
+        {
+                      
+            get => _accessToken;
+
+            set
+            {      
+                if (value.GetType() == Type.GetType("SecureString"))
+                {
+                    _accessToken = (SecureString)value.Copy();
+                }
+            }
+
+        }
+
+        // ********************** Todd Albers Comment
+        // I think it is better to force the use of SecureeString and not allow this below.
+        // But CreateAuthorizationHeader below currently requires a string type.
+        // So, putthing this here for now, as private.
+        // Obviously, if you did something like this, it should all be SecureString though.
+        // There is little point in implementing SecureString if you allow it to be string in some places like this.
+        // 
+        private string AccessToken
+        {
+            get
+            {
+                return _accessToken.ToString();
+            }              
+        }
+
 
         /// <summary>
         /// In case when Azure AD has an outage, to be more resilient, it can return tokens with
@@ -220,7 +289,7 @@ namespace Microsoft.Identity.Client
         public DateTimeOffset ExpiresOn { get; }
 
         /// <summary>
-        /// Gets the point in time in which the Access Token returned in the AccessToken property ceases to be valid in MSAL's extended LifeTime.
+        /// Gets the point in time in which the Access Token returned in the AccessToken property ceases to be valid in MSALs extended LifeTime.
         /// This value is calculated based on current UTC time measured locally and the value ext_expiresIn received from the service.
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)] // deprecated, this feature is not in use
@@ -300,7 +369,11 @@ namespace Microsoft.Identity.Client
                 CultureInfo.InvariantCulture,
                 "{0} {1}",
                 _authenticationScheme?.AuthorizationHeaderPrefix ?? TokenType,
-                AccessToken);
+                AccessToken);  // Here I suppose you have to stick with AccessToken of string type.  ********************** Todd Albers Comment
+                               // But, perhaps the HttpClient.DefaultRequestHeaders.Add("Authorization", result.CreateAuthorizationHeader())  ********************** Todd Albers Comment
+                               // could also be modified to accent an AuthorizationHeader in which the AccessToken is of type SecureString also. ********************** Todd Albers Comment
+                               // You get the idea I am sure.  Keep the token in a SecureString at all times until you actualy ********************** Todd Albers Comment
+                               // have to convert it to string. ********************** Todd Albers Comment
         }
     }
 }
